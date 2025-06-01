@@ -186,10 +186,11 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 		}
 
 		// Generate cookie
-		http.SetCookie(w, MakeCookie(r, user.Email))
+		http.SetCookie(w, MakeCookie(r, user.PrefUser))
 		logger.WithFields(logrus.Fields{
 			"provider": providerName,
 			"redirect": redirect,
+			"prefUser":  user.PrefUser,
 			"user":     user.Email,
 		}).Info("Successfully generated auth cookie, redirecting user.")
 
