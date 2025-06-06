@@ -6,7 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/thomseddon/traefik-forward-auth/internal/provider"
-	muxhttp "github.com/traefik/traefik/v2/pkg/muxer/http"
+	muxhttp "github.com/traefik/traefik/v3/pkg/muxer/http"
 )
 
 // Server contains muxer and handler methods
@@ -22,33 +22,35 @@ func NewServer() *Server {
 }
 
 func (s *Server) buildRoutes() {
-	var err error
-	s.muxer, err = muxhttp.NewMuxer()
+	parser, err := muxhttp.NewSyntaxParser()
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.muxer = muxhttp.NewMuxer(parser)
 
 	// Let's build a muxer
 	for name, rule := range config.Rules {
 		matchRule := rule.formattedRule()
 		if rule.Action == "allow" {
-			_ = s.muxer.AddRoute(matchRule, 1, s.AllowHandler(name))
+			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), s.AllowHandler(name))
 		} else {
-			_ = s.muxer.AddRoute(matchRule, 1, s.AuthHandler(rule.Provider, name))
+			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), s.AuthHandler(rule.Provider, name))
 		}
 	}
 
 	// Add callback handler
-	s.muxer.Handle(config.Path, s.AuthCallbackHandler())
+	callbackRule := "Path(`" + config.Path + "`)"
+	_ = s.muxer.AddRoute(callbackRule, "v2", muxhttp.GetRulePriority(callbackRule), s.AuthCallbackHandler())
 
 	// Add logout handler
-	s.muxer.Handle(config.Path+"/logout", s.LogoutHandler())
+	logoutRule := "Path(`" + config.Path + "/logout`)"
+	_ = s.muxer.AddRoute(logoutRule, "v2", muxhttp.GetRulePriority(logoutRule), s.LogoutHandler())
 
 	// Add a default handler
 	if config.DefaultAction == "allow" {
-		s.muxer.NewRoute().Handler(s.AllowHandler("default"))
+		s.muxer.SetDefaultHandler(s.AllowHandler("default"))
 	} else {
-		s.muxer.NewRoute().Handler(s.AuthHandler(config.DefaultProvider, "default"))
+		s.muxer.SetDefaultHandler(s.AuthHandler(config.DefaultProvider, "default"))
 	}
 }
 
@@ -190,7 +192,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 		logger.WithFields(logrus.Fields{
 			"provider": providerName,
 			"redirect": redirect,
-			"prefUser":  user.PrefUser,
+			"prefUser": user.PrefUser,
 			"user":     user.Email,
 		}).Info("Successfully generated auth cookie, redirecting user.")
 
