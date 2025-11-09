@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25.4-alpine AS builder
 
 # Setup
 RUN mkdir -p /go/src/github.com/thomseddon/traefik-forward-auth
