@@ -8,7 +8,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/thomseddon/go-flags v1.4.1-0.20190507184247-a3629c504486
-	github.com/traefik/traefik/v3 v3.6.7
+	github.com/traefik/traefik/v3 v3.6.8
 	golang.org/x/oauth2 v0.34.0
 )
 
@@ -61,11 +61,11 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
