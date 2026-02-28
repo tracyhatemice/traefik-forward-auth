@@ -229,8 +229,7 @@ func (c *Config) parseUnknownFlag(option string, arg flags.SplitArgument, args [
 }
 
 func handleFlagError(err error) error {
-	flagsErr, ok := err.(*flags.Error)
-	if ok && flagsErr.Type == flags.ErrHelp {
+	if flagsErr, ok := errors.AsType[*flags.Error](err); ok && flagsErr.Type == flags.ErrHelp {
 		// Library has just printed cli help
 		os.Exit(0)
 	}

@@ -4,7 +4,8 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -12,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	jose "github.com/go-jose/go-jose/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 // Tests
@@ -184,7 +185,7 @@ func NewOIDCServer(t *testing.T, key *rsaKey, body map[string]string) (*httptest
 }
 
 func (s *OIDCServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 
 	if r.URL.Path == "/.well-known/openid-configuration" {
 		// Open id config

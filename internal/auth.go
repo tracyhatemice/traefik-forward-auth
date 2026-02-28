@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -99,12 +100,7 @@ func ValidateEmail(email, ruleName string) bool {
 
 // ValidateWhitelist checks if the email is in whitelist
 func ValidateWhitelist(email string, whitelist CommaSeparatedList) bool {
-	for _, whitelist := range whitelist {
-		if email == whitelist {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(whitelist, email)
 }
 
 // ValidateDomains checks if the email matches a whitelisted domain
@@ -113,12 +109,7 @@ func ValidateDomains(email string, domains CommaSeparatedList) bool {
 	if len(parts) < 2 {
 		return false
 	}
-	for _, domain := range domains {
-		if domain == parts[1] {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(domains, parts[1])
 }
 
 // Utility methods
@@ -244,13 +235,13 @@ func ValidateCSRFCookie(c *http.Cookie, state string) (valid bool, provider stri
 
 	// Extract provider
 	params := state[33:]
-	split := strings.Index(params, ":")
-	if split == -1 {
+	before, after, ok := strings.Cut(params, ":")
+	if !ok {
 		return false, "", "", errors.New("Invalid CSRF state format")
 	}
 
 	// Valid, return provider and redirect
-	return true, params[:split], params[split+1:], nil
+	return true, before, after, nil
 }
 
 // MakeState generates a state value
@@ -377,7 +368,7 @@ type CookieDomains []CookieDomain
 // of CookieDomains
 func (c *CookieDomains) UnmarshalFlag(value string) error {
 	if len(value) > 0 {
-		for _, d := range strings.Split(value, ",") {
+		for d := range strings.SplitSeq(value, ",") {
 			cookieDomain := NewCookieDomain(d)
 			*c = append(*c, *cookieDomain)
 		}
