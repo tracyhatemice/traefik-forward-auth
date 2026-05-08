@@ -26,25 +26,25 @@ func (s *Server) buildRoutes() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s.muxer = muxhttp.NewMuxer(parser)
+	s.muxer = muxhttp.NewMuxer(parser, nil)
 
 	// Let's build a muxer
 	for name, rule := range config.Rules {
 		matchRule := rule.formattedRule()
 		if rule.Action == "allow" {
-			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), s.AllowHandler(name))
+			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), "", s.AllowHandler(name))
 		} else {
-			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), s.AuthHandler(rule.Provider, name))
+			_ = s.muxer.AddRoute(matchRule, "v2", muxhttp.GetRulePriority(matchRule), "", s.AuthHandler(rule.Provider, name))
 		}
 	}
 
 	// Add callback handler
 	callbackRule := "Path(`" + config.Path + "`)"
-	_ = s.muxer.AddRoute(callbackRule, "v2", muxhttp.GetRulePriority(callbackRule), s.AuthCallbackHandler())
+	_ = s.muxer.AddRoute(callbackRule, "v2", muxhttp.GetRulePriority(callbackRule), "", s.AuthCallbackHandler())
 
 	// Add logout handler
 	logoutRule := "Path(`" + config.Path + "/logout`)"
-	_ = s.muxer.AddRoute(logoutRule, "v2", muxhttp.GetRulePriority(logoutRule), s.LogoutHandler())
+	_ = s.muxer.AddRoute(logoutRule, "v2", muxhttp.GetRulePriority(logoutRule), "", s.LogoutHandler())
 
 	// Add a default handler
 	if config.DefaultAction == "allow" {
